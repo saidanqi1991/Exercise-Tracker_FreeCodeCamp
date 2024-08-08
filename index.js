@@ -57,7 +57,8 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   const id = req.params._id;
   const description = req.body.description;
   const duration = req.body.duration;
-  const date = req.body.date;
+  const date = req.body.date ? new Date(req.body.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+  
   //check if user exists
   const user = await userModel.findOne({_id: id});
   //test
@@ -82,7 +83,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     return res.json({
       _id: savedExercise['_id'],
       username: user.username,
-      date: savedExercise.date,
+      date: new Date(savedExercise.date).toDateString,
       duration: savedExercise.duration,
       description: savedExercise.description,
     });
@@ -104,8 +105,8 @@ app.get("/api/users/:_id/logs", async (req, res) => {
   let exerciseQuery = { userid: id };
   if(from || to){
     exerciseQuery.date = {};
-    if (from) exerciseQuery.date.$gte = new Date(from).toDateString();
-    if (to) exerciseQuery.date.$lte = new Date(to).toDateString();
+    if (from) exerciseQuery.date.$gte = new Date(from).toISOString().split('T')[0];
+    if (to) exerciseQuery.date.$lte = new Date(to).toISOString().split('T')[0];
   }
 
   //Find  the exercises with constructed query
@@ -126,7 +127,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     log: exerciseResults.map(exercise => ({
       description: exercise.description,
       duration: exercise.duration,
-      date: exercise.date
+      date: new Date(exercise.date).toDateString()
     }))
   });
 });
