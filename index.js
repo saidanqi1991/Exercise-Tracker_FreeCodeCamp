@@ -20,9 +20,9 @@ const userSchema = new mongoose.Schema({
   username: {type: String, required: true},
 }, { versionKey: false });
 const exerciseSchema = new mongoose.Schema({
-  userid: String,
-  description: String,
-  duration: Number,
+  userid: {type: String, required: true},
+  description: {type: String, required: true},
+  duration: {type: Number, required: true},
   date: String
 }, { versionKey: false });
 const userModel = mongoose.model('userModel2', userSchema);
@@ -41,7 +41,7 @@ app.post('/api/users', async (req, res) => {
     });
     
     let savedUser = await newUser.save();
-    return res.json({username: savedUser.username, _id: savedUser['_id']});
+    return res.json({username: savedUser.username, _id: savedUser._id});
   }
 });
 
@@ -75,11 +75,11 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     
     //return user object with exercise
     return res.json({
+      _id: user._id,
       username: user.username,
       date: new Date(savedExercise.date).toDateString(),
       duration: savedExercise.duration,
-      description: savedExercise.description,
-      _id: savedExercise._id
+      description: savedExercise.description
     });
   };
 });
