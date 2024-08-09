@@ -1,7 +1,6 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 require('dotenv').config()
 
@@ -10,8 +9,8 @@ app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 //Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -40,8 +39,6 @@ app.post('/api/users', async (req, res) => {
     const newUser = new userModel({
       username: req.body.username,
     });
-    //test
-    console.log(newUser);
     
     let savedUser = await newUser.save();
     return res.json({username: savedUser.username, _id: savedUser['_id']});
@@ -53,6 +50,7 @@ app.get("/api/users", async (req, res) => {
   return res.json(users);
 })
 
+//post exercises
 app.post("/api/users/:_id/exercises", async (req, res) => {
   const id = req.params._id;
   const description = req.body.description;
@@ -61,8 +59,6 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   
   //check if user exists
   const user = await userModel.findOne({_id: id});
-  //test
-  console.log('user found:', user);
   
   if(!user){
     //return error if user doesn't exist
@@ -76,20 +72,19 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       date: date || new Date().toDateString()
     })
     let savedExercise = await newExercise.save();
-    //test
-    console.log('exercise saved:', savedExercise);
     
     //return user object with exercise
     return res.json({
-      _id: savedExercise['_id'],
       username: user.username,
-      date: new Date(savedExercise.date).toDateString,
+      date: new Date(savedExercise.date).toDateString(),
       duration: savedExercise.duration,
       description: savedExercise.description,
+      _id: savedExercise._id
     });
   };
 });
 
+//get user's exercise log
 app.get("/api/users/:_id/logs", async (req, res) => {
   const id = req.params._id;
   const { from, to, limit } = req.query;
